@@ -1,27 +1,37 @@
-## `scan_augment.py` Scan Augmentation Script
 
-This script augments medical images (`.nii` only for now) along with their corresponding segmentation masks. It applies a random rotation (90°, 180°, or 270°) and Gaussian blur with a Sigma value ranging from `0.5-1.5`, then saves the augmented files in the same folder.
+# `scan_augment.py` — Scan Augmentation Script
 
-### How it Works
+This Python script performs augmentation on medical imaging files (`.nii`) and their corresponding segmentation masks.  
+It applies **random rotations (90°, 180°, or 270°)** and a **Gaussian blur** with a sigma value between **0.5 and 1.5**.
 
--   Looks for image + segmentation pairs using this naming format:
+Augmented images are saved in the **same directory** with a prefix added to the filename.
+
+##  How It Works
+The script automatically scans a folder and detects valid image + segmentation pairs using the following naming format:
+
+    IMAGE.nii <- Image
+    awSeg_IMAGE.nii <- Segmentation Mask  
+
+Augmented outputs will be generated as:
+
+    aug_IMAGE.nii
+    aug_awSeg_IMAGE.nii
+  
+ You can optionally augment only a portion of the dataset using the `--split` argument (default = augment everything).
+
+## Usage
+
+Run the script with:
+
+    python scan_augment.py -i path/to/folder
     
-`IMAGE.nii awSeg_IMAGE.nii ← segmentation` 
+|Arguement|Desription  |Defalt|
+|--|--|--|
+|`-i / --input`|Directory containing scans and segmentations|REQUIRED|
+|`-p / --seg_prefix`|Prefix for segmentation masks|awSeg_
+|`-s / --split| Percentage of dataset to augment | 1
 
--   Augmented files are saved with the prefix:
+Example:
 
-`aug_IMAGE.nii
-aug_awSeg_IMAGE.nii` 
+    python scan_augment.py -i X:/scans_segs -s 0.5
 
-### Run Command
-
-`python scan_augment.py -i path/to/folder` 
-
-
-### Requirements
-
- - SimpleITK
- - Scipy
- - Numpy
-
- 
