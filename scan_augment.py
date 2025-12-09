@@ -41,7 +41,7 @@ def process_file(image_path, augmenter):
     sitk.WriteImage(aug_image, output_path)
     print(f"Saved: {output_path}")
 
-def load_pairs(input_dir, seg_prefix="awSeg_"): #this assumes that the files will have awSeg_ prefix for segmentation masks (like in the shared drive folder)
+def load_pairs(input_dir, seg_prefix="awSeg_"):
     files = os.listdir(input_dir)
     pairs = {}
     for file in files:
@@ -55,12 +55,16 @@ def load_pairs(input_dir, seg_prefix="awSeg_"): #this assumes that the files wil
     for k, v in pairs.items():
         if "img" in v and "seg" in v:
             print(f"Found pair: Image: {v['img']}, Segmentation: {v['seg']}")
-    print(f"Total pairs found: {len([1 for v in pairs.values() if 'img' in v and 'seg' in v])}")
     return {k: v for k, v in pairs.items() if "img" in v and "seg" in v}
 
-def process(input_dir):
-    pairs = load_pairs(input_dir)
+def process(input_dir, seg_prefix="awSeg_", split="1"):
+    print(f"Loading pairs from {input_dir} with segmentation prefix '{seg_prefix}'")
+    pairs = load_pairs(input_dir, seg_prefix)
+    print(f"Starting augmentation on {len(pairs)} pairs with split {float(split)*100}%")
     for base, pair in pairs.items():
+        if np.random.rand() > float(split):
+            print(f"Skipping pair: Image: {pair['img']}, Segmentation: {pair['seg']}")
+            continue
         img_path = os.path.join(input_dir, pair["img"])
         seg_path = os.path.join(input_dir, pair["seg"])
         img = sitk.ReadImage(img_path)
@@ -71,14 +75,10 @@ def process(input_dir):
         sitk.WriteImage(aug_seg, os.path.join(input_dir, f"aug_{pair['seg']}"))
         print(f"Saved aug_{pair['img']} and aug_{pair['seg']}")
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Batch augment paired images and masks.")
     parser.add_argument("-i", "--input", required=True, help="Directory containing image + awSeg_ masks")
+    parser.add_argument("-p", "--seg_prefix", default="awSeg_", help="Prefix for segmentation masks (default: awSeg_)")
+    parser.add_argument("-s", "--split",default="1", help="percentage of dataset to augment. Default is all (1)")
     args = parser.parse_args()
-    process(args.input)
-
-
-#TO DO
-# - Add more augmentation techniques?
-# - Allow only a % of the dataset to be augmented?
+    process(args.input, seg_prefix=args.seg_prefix, split=args.split)
