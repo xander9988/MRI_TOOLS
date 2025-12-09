@@ -33,5 +33,5 @@ Run the script with:
 
 Example:
 
-    python scan_augment.py -i X:/scans_segs -s 0.5
+    python scan_augment.py -i X:/scans_segs -p "seg_" -s 0.5
 
